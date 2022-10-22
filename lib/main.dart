@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:test4/hive/postsave.dart';
 
 import 'screen/homepage.dart';
 
-void main() {
+void main() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(PostSaveAdapter());
+
+  await Hive.openBox<PostSave>("posts");
   runApp(const MyApp());
 }
 

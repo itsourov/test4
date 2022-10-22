@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:material_dialogs/widgets/buttons/icon_outline_button.dart';
 import 'package:test4/modal/category.dart';
+import 'package:test4/screen/category_based_post_list.dart';
 import 'package:test4/views/shimmer_layout.dart';
 
 import '../helper/constants.dart';
@@ -25,6 +26,13 @@ class _CategoryListState extends State<CategoryList>
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   List<Category> categories = [];
   late String loadingUrl;
@@ -121,7 +129,7 @@ class _CategoryListState extends State<CategoryList>
                 ),
               );
             } else {
-              return Text("no more posts a");
+              return Text("no more posts ");
             }
           }
 
@@ -129,7 +137,15 @@ class _CategoryListState extends State<CategoryList>
           var thumbnail = categories[index].thumbnail;
 
           return InkWell(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CategoryBasedPostList(
+                          myCategoryObj: categories[index],
+                        )),
+              );
+            },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

@@ -3,9 +3,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:like_button/like_button.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:material_dialogs/widgets/buttons/icon_outline_button.dart';
+import 'package:test4/hive/postsave.dart';
 import 'package:test4/screen/post_details.dart';
 import 'package:test4/views/shimmer_layout.dart';
 
@@ -16,7 +18,8 @@ import 'package:material_dialogs/material_dialogs.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class PostListView extends StatefulWidget {
-  const PostListView({super.key});
+  final String? catId;
+  const PostListView(this.catId, {super.key});
 
   @override
   State<PostListView> createState() => _PostListViewState();
@@ -25,13 +28,22 @@ class PostListView extends StatefulWidget {
 class _PostListViewState extends State<PostListView>
     with AutomaticKeepAliveClientMixin {
   final _controller = ScrollController();
+  int _getItemNumber = 10;
 
   @override
   bool get wantKeepAlive => true;
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  var postSaveBox = Hive.box<PostSave>('posts');
   List<Post> posts = [];
   late String loadingUrl;
-  String? catId;
+
   bool loading = false;
   bool hasMorePosts = true;
   bool showShimmer = true;
@@ -39,8 +51,8 @@ class _PostListViewState extends State<PostListView>
 
   @override
   void initState() {
-    if (catId != null) {
-      loadingUrl = "${Constants.baseRestUrl}posts?categories=$catId&";
+    if (widget.catId != null) {
+      loadingUrl = "${Constants.baseRestUrl}posts?categories=${widget.catId}&";
     } else {
       loadingUrl = "${Constants.baseRestUrl}posts?";
     }
@@ -56,6 +68,7 @@ class _PostListViewState extends State<PostListView>
             setState(() {
               pageNo++;
               loadRestApi();
+              _getItemNumber = posts.length + 1;
             });
           }
         }
@@ -110,7 +123,7 @@ class _PostListViewState extends State<PostListView>
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         controller: _controller,
-        itemCount: getPostsLength(posts),
+        itemCount: _getItemNumber,
         itemBuilder: (context, index) {
           if (showShimmer) {
             return ShimmerLyoutPostList();
@@ -132,7 +145,7 @@ class _PostListViewState extends State<PostListView>
           }
 
           var title = posts[index].title;
-          var thumbnail = posts[index].thumbnail;
+          var thumbnail = posts[index].thumbnailSmall;
           var agoTime = posts[index].agoTime;
           var catName = posts[index].catName;
           return InkWell(
@@ -140,8 +153,8 @@ class _PostListViewState extends State<PostListView>
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => PostDetails(
-                          myPostObj: posts[index],
+                    builder: (context) => PostDetailsWithThumbnail(
+                          PostObj: posts[index],
                         )),
               );
             },
@@ -204,7 +217,22 @@ class _PostListViewState extends State<PostListView>
                       right: 0,
                       child: Row(
                         children: [
-                          LikeButton(),
+                          LikeButton(
+                            isLiked: postSaveBox.keys.contains(posts[index].id),
+                            onTap: (isLiked) async {
+                              if (isLiked) {
+                                postSaveBox.delete(posts[index].id);
+                              } else {
+                                PostSave postSave = PostSave();
+                                postSave.titleSave = title ?? "";
+                                postSave.detailsSave = catName ?? "";
+
+                                postSaveBox.put(posts[index].id, postSave);
+                              }
+
+                              return !isLiked;
+                            },
+                          ),
                           Container(
                             decoration: const BoxDecoration(
                                 borderRadius:
@@ -256,6 +284,7 @@ class _PostListViewState extends State<PostListView>
         for (var i = 0; i < jsonArray.length; i++) {
           setState(() {
             posts.add(Post.fromJson(jsonArray[i]));
+            _getItemNumber = posts.length;
           });
         }
       } else if (response.statusCode == 400) {
@@ -311,14 +340,6 @@ class _PostListViewState extends State<PostListView>
           ),
         ],
       );
-    }
-  }
-
-  int getPostsLength(List<Post> posts) {
-    if (showShimmer) {
-      return 10;
-    } else {
-      return posts.length + 1;
     }
   }
 }

@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:material_dialogs/material_dialogs.dart';
 import 'package:material_dialogs/widgets/buttons/icon_button.dart';
 import 'package:material_dialogs/widgets/buttons/icon_outline_button.dart';
+import 'package:test4/views/bookmark_list.dart';
 import 'package:test4/views/category_list.dart';
+import 'package:test4/views/search_post.dart';
 
 import '../views/post_list.dart';
 
@@ -61,6 +63,7 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Homepage"),
+          actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
         ),
         body: PageView(
           scrollDirection: Axis.horizontal,
@@ -71,10 +74,10 @@ class _HomePageState extends State<HomePage> {
             });
           },
           children: const [
-            PostListView(),
+            PostListView(null),
             CategoryList(),
-            Text("Search"),
-            Text("Bookmark"),
+            SearchPost(),
+            BookmarkList(),
             Text("Profile"),
           ],
         ),
@@ -116,5 +119,40 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+}
+
+class DataSearch extends SearchDelegate<String> {
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        onPressed: () {},
+        icon: Icon(Icons.clear),
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {},
+      icon: AnimatedIcon(
+        icon: AnimatedIcons.menu_arrow,
+        progress: transitionAnimation,
+      ),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // TODO: implement buildResults
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // TODO: implement buildSuggestions
+    throw UnimplementedError();
   }
 }
