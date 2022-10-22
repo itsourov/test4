@@ -145,9 +145,13 @@ class _PostListViewState extends State<PostListView>
           }
 
           var title = posts[index].title;
-          var thumbnail = posts[index].thumbnailSmall;
           var agoTime = posts[index].agoTime;
           var catName = posts[index].catName;
+          var content = posts[index].content;
+          var date = posts[index].date;
+          var thumbnailSmall = posts[index].thumbnailSmall;
+          var thumbnailFull = posts[index].thumbnailFull;
+
           return InkWell(
             onTap: () {
               Navigator.push(
@@ -169,7 +173,7 @@ class _PostListViewState extends State<PostListView>
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
                           child: Image.network(
-                            thumbnail ?? Constants.defaultImageUrl,
+                            thumbnailSmall ?? Constants.defaultImageUrl,
                             height: 80.0,
                             width: 120.0,
                             fit: BoxFit.cover,
@@ -217,20 +221,32 @@ class _PostListViewState extends State<PostListView>
                       right: 0,
                       child: Row(
                         children: [
-                          LikeButton(
-                            isLiked: postSaveBox.keys.contains(posts[index].id),
-                            onTap: (isLiked) async {
-                              if (isLiked) {
-                                postSaveBox.delete(posts[index].id);
-                              } else {
-                                PostSave postSave = PostSave();
-                                postSave.titleSave = title ?? "";
-                                postSave.detailsSave = catName ?? "";
+                          ValueListenableBuilder<Box>(
+                            valueListenable: postSaveBox.listenable(),
+                            builder: (context, value, child) {
+                              return LikeButton(
+                                isLiked:
+                                    postSaveBox.keys.contains(posts[index].id),
+                                onTap: (isLiked) async {
+                                  if (isLiked) {
+                                    postSaveBox.delete(posts[index].id);
+                                  } else {
+                                    PostSave postSave = PostSave();
+                                    postSave.title = title ?? "";
+                                    postSave.content = content ?? "";
+                                    postSave.date = date ?? "";
+                                    postSave.thumbnailSmall =
+                                        thumbnailSmall ?? "";
+                                    postSave.thumbnailFull =
+                                        thumbnailFull ?? "";
+                                    postSave.catName = catName ?? "";
 
-                                postSaveBox.put(posts[index].id, postSave);
-                              }
+                                    postSaveBox.put(posts[index].id, postSave);
+                                  }
 
-                              return !isLiked;
+                                  return !isLiked;
+                                },
+                              );
                             },
                           ),
                           Container(

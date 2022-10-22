@@ -17,18 +17,30 @@ class PostSaveAdapter extends TypeAdapter<PostSave> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return PostSave()
-      ..titleSave = fields[0] as String
-      ..detailsSave = fields[1] as String;
+      ..title = fields[0] as String
+      ..content = fields[1] as String
+      ..date = fields[2] as String
+      ..thumbnailSmall = fields[3] as String
+      ..thumbnailFull = fields[4] as String
+      ..catName = fields[5] as String;
   }
 
   @override
   void write(BinaryWriter writer, PostSave obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(6)
       ..writeByte(0)
-      ..write(obj.titleSave)
+      ..write(obj.title)
       ..writeByte(1)
-      ..write(obj.detailsSave);
+      ..write(obj.content)
+      ..writeByte(2)
+      ..write(obj.date)
+      ..writeByte(3)
+      ..write(obj.thumbnailSmall)
+      ..writeByte(4)
+      ..write(obj.thumbnailFull)
+      ..writeByte(5)
+      ..write(obj.catName);
   }
 
   @override

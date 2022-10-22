@@ -15,7 +15,7 @@ class Post {
     required this.date,
     required this.thumbnailSmall,
     required this.thumbnailFull,
-    required this.agoTime,
+    this.agoTime,
     required this.catName,
   });
 
